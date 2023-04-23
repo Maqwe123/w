@@ -1,0 +1,294 @@
+<?php
+	//验证界面
+	session_start();
+	include("usercolletion.php");
+	$user=$_POST["user"];
+	$password=$_POST["password"];
+	$login=$_POST["login"];
+/**
+ * 接受用户登陆时提交的验证码
+ */
+//1. 获取到用户提交的验证码
+$captcha = $_POST["yanzheng"];
+//2. 将session中的验证码和用户提交的验证码进行核对,当成功时提示验证码正确,不成功则跳回重新提交
+if(strtolower($_SESSION["image_captcha"]) == strtolower($captcha)){
+    echo "<h5>yes！验证码正确!</h5>";
+}else{
+    echo "NO! 验证码提交不正确!";
+    header("refresh:3;url=login.php");//输入错误跳转登录页面
+}
+	if(isset($login)){
+	$result=mysql_query("SELECT * FROM text2 where user='$user' and password='$password'",$conn);
+	
+		if($myrow=mysql_fetch_row($result)){
+			$_SESSION['user']=$user;
+			$_SESSION['islogin']=1;
+		echo"<script>alert('登录成功..点击跳转');</script>";
+				//echo"<script>window.location.href='d.php';</script>";
+		}
+		else{
+			echo"<script>alert('用户名或密码错误');</script>";
+				echo"<script>window.location.href='login.php';</script>";
+		}}
+	?>
+
+<html>
+	<head><meta charset="utf-8"/>
+	<title>学生信息管理系统--后台界面</title>
+	<style>
+		body{
+			width: 100%;
+			height: 100%;
+			
+		}
+		.middle{
+			height:600px;
+			width: 900px;
+			margin-left: 300px;	
+		     border-radius: px;
+			
+		}
+        .biaoge{
+           
+        	position: absolute;
+        	op: 170px;
+        	right:410px;
+        	eight: 390px;
+        	idth: 700px;
+        	width: 710;
+           border:0px solid ;
+           border-radius: 0px;
+        	/*border-radius: 15px;*/
+        }
+        }
+        .huanying{
+        	position: absolute;
+        	top: 102px;
+        	right:135px;
+        	height: 30px;
+        	width: 180px;
+        	font-size: 20; 	
+        	color: whitesmoke;
+        }
+        .add{
+        	position: absolute;
+        	top: 120px;
+        	right:665px;
+        	height: 390px;
+        	width: 500px;
+        	font-size: 20; 	
+        }
+        .top{
+        	position: absolute;
+        	top:102px;
+        	right: 825px;
+        }
+        .shouye{
+        	position: absolute;
+        	top: 700px;
+        	right: 700px;
+        }
+        .all{background-image: url(25f.jpg);
+        	}
+		</style>
+	 </head>
+	<body>
+	<!-- 顶部部分-->
+	<div class="all">
+	    <div class="top">
+		  	<form action="#" method="post"><table>
+		  		<tr><td><input type="text" placeholder="请输入名字" name="name"/></td><td><font color="white"><input type="submit" value="查询" name="submit1"/>
+		  			<td><input type="submit" value="全部学生" name="submit2"/></td>
+		  		</font></td></tr>
+		  	</table></form>
+		</div> 
+		<div class="huanying">
+				<?php 
+				session_start();
+			//	if(isset($_SESSION['islogin'])){
+				//	echo $_SESSION['user'].",欢迎您";	
+					$user=$_SESSION['user'];
+					echo "<a href='mima.php'><font color='white'>$user</font></a>".",欢迎您";
+					echo"&nbsp&nbsp|&nbsp&nbsp";
+					echo"<a href='exit.php'/><font color='white'>退出</font></a>";
+			//	}
+				?>
+		</div>  
+	<!-- 中间部分-->
+		<div class="middle">
+			<div class="biaoge">
+					<table cellpadding="0" cellspacing="0" align="center" width="700px" border="0"  >
+							<thead><tr>
+								<td width="50"><b>头像</b></td>
+								<td><b>id</b></td>
+								<td><b>姓名</b></td>
+								<td><b>电话</b></td>
+								<td><b>专业</b></td>
+								<td><b>班级</b></td>
+								<td><b>宿舍</b></td>
+								<td></td>
+							</tr></thead>
+				<?php
+                  include("usercolletion.php");
+                  if(isset($_POST['submit2'])){
+                  	header("location:d.php");
+                  }
+                  if(isset($_POST['submit1'])){
+                  	$name=$_POST['name'];
+                  	$tj="name like '%{$name}%'";
+                  	$sql="select * from text3 where {$tj} order by id asc";
+                  }else{
+                  	$sql="select * from text3 order by id asc";
+                  }
+                  $result=mysql_query($sql,$conn);
+             //     foreach($array as $key=>$row){
+                  	while($row=mysql_fetch_object($result)){
+                   	echo"<tr>
+                   		<td><img src='".$row->image."'width=45 /></td>";
+                   	echo"<td>".$row->id."</td>";
+                   	echo"<td>".$row->name."</td>";
+                   	echo"<td>".$row->phone."</td>";
+                    echo"<td>".$row->major."</td>";
+                   	echo"<td>".$row->class."</td>";
+                   	echo"<td>".$row->room."</td>";
+                   	echo"<td width=80><a href='javascript:del({$row->id})'>删除</a> <a href='edit.php?id={$row->id}'>修改</a></td></tr>";
+                       }       ?>      
+                 <tr><td colspan='8' align='center'><a href="add.php"/>添加学生</a></td></tr>
+                 </table>
+			     </div>
+			     <div class="shouye">
+			     	<a href="d.php?pageNum=1">首页</a>
+			     	<a href="d.php?pageNum=<?php //echo $pageNum==1?1:($pageNum-1)?>">上一页</a>
+			     	<a href="d.php?pageNum=<?php// echo $pageNum==$endPage?$endPage:($pageNum+1)?>">下一页</a>
+			     	<a href="d.php?pageNum=<?php //echo $endPage?>">尾页</a>
+			     </div>
+		    </div></div>
+<script type="text/javascript">
+	function del(id){
+		if(confirm("确认删除此条学生信息?")){
+			window.location="delete.php?id="+id;
+		}
+	}</script>
+	</body>
+</html>
+<html>
+	<head><meta charset="utf-8"/>
+	<title></title>
+	<style>
+		body{
+	
+		}        
+		.top{
+        	background-color:lightsteelblue ;
+           height: 10%;
+        }
+		.middle{
+			height: 90%;
+           background-color: lightsteelblue;
+		}
+        .biaoge{
+        	background-color: white;
+
+width: 93%;
+margin: 0 auto;
+height: 92%;
+border-radius: 25px;
+        }
+        }
+        .add{
+
+        }
+
+        .shouye{
+        }
+       .admin{width: 30%;height: 100%;
+float: right;
+	   }
+	   .l{width: 70%;height: 100%;
+float: left;
+	   	
+	   }
+        	
+		</style>
+	 </head>
+	<body>
+	<!-- 顶部部分-->
+	<div class="all">
+		<div class="top">
+					<div class="admin">
+				<?php 
+				session_start();
+			//	if(isset($_SESSION['islogin'])){
+				//	echo $_SESSION['user'].",欢迎您";	
+					$user=$_SESSION['user'];
+					echo "<a href='mima.php'><h1><font color='white'>$user</font></a>".",欢迎您";
+					echo"&nbsp&nbsp|&nbsp&nbsp";
+					echo"<a href='exit.php'/><font color='white'>退出</font></a><h1>";
+			//}
+				?>
+		</div> <div class="l"><h1>试题录入库系统</h1></div> 
+		</div>
+	    <div class="to">
+		</div> 
+	<!-- 中间部分-->
+		<div class="middle">
+			<div class="biaoge">
+						  	<form action="#" method="post"><table>
+		  		<tr><td><input type="text" placeholder="请输入名字" name="name"/></td><td><font color="white"><input type="submit" value="查询" name="submit1"/>
+		  			<td><input type="submit" value="全部学生" name="submit2"/></td>
+		  		</font></td></tr>
+		  	</table></form>
+					<table cellpadding="0" cellspacing="0" align="center" width="700px" border="1"  >
+							<thead><tr>
+							
+								<td><b>序号</b></td>
+								<td><b>题干</b></td>
+								<td><b>题型</b></td>
+								<td><b>难度</b></td>
+								<td><b>知识点</b></td>
+								<td><b>创建时间</b></td>
+								<td></td>
+							</tr></thead>
+				<?php
+                  include("usercolletion.php");
+                  if(isset($_POST['submit2'])){
+                  	header("location:d.php");
+                  }
+                  if(isset($_POST['submit1'])){
+                  	$name=$_POST['name'];
+                  	$tj="name like '%{$name}%'";
+                  	$sql="select * from text3 where {$tj} order by id asc";
+                  }else{
+                  	$sql="select * from text3 order by id asc";
+                  }
+                  $result=mysql_query($sql,$conn);
+             //     foreach($array as $key=>$row){
+                  	while($row=mysql_fetch_object($result)){
+                   	echo"<tr>
+                   		<td><img src='".$row->image."'width=45 /></td>";
+                   	echo"<td>".$row->id."</td>";
+                   	echo"<td>".$row->tigan."</td>";
+                   	echo"<td>".$row->tixing."</td>";
+                    echo"<td>".$row->nandu."</td>";
+                   	echo"<td>".$row->zsname."</td>";
+                   	echo"<td>".$row->ctime."</td>";
+                   	echo"<td width=80><a href='javascript:del({$row->id})'>删除</a> <a href='edit.php?id={$row->id}'>修改</a></td></tr>";
+                       }       ?>      
+                 <tr><td colspan='8' align='center'><a href="add.php"/>添加学生</a></td></tr>
+                 </table>
+			     </div>
+			     <div class="shouye">
+			     	<a href="d.php?pageNum=1">首页</a>
+			     	<a href="d.php?pageNum=<?php //echo $pageNum==1?1:($pageNum-1)?>">上一页</a>
+			     	<a href="d.php?pageNum=<?php// echo $pageNum==$endPage?$endPage:($pageNum+1)?>">下一页</a>
+			     	<a href="d.php?pageNum=<?php //echo $endPage?>">尾页</a>
+			     </div>
+		    </div></div>
+<script type="text/javascript">
+	function del(id){
+		if(confirm("确认删除此条学生信息?")){
+			window.location="delete.php?id="+id;
+		}
+	}</script>
+	</body>
+</html>
